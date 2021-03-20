@@ -1,10 +1,14 @@
 package com.karine.tvcharacters
 
+import android.content.Context
+import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
+import com.karine.tvcharacters.databinding.CellCharactersBinding
 
-class CharactersAdapter :RecyclerView.Adapter<CharactersAdapter.CharacterViewHolder>() {
+class CharactersAdapter() :RecyclerView.Adapter<CharactersAdapter.CharacterViewHolder>() {
 
     val characterList = arrayOf(Characters("Richard Hendricks", "Silicon Valley"),
     Characters("Jared Dunn", "Silicon Valley"),
@@ -19,19 +23,42 @@ class CharactersAdapter :RecyclerView.Adapter<CharactersAdapter.CharacterViewHol
         Characters("Allan Harper", "Two and Half men"),
         Characters("Jake Harper", "Two and Half men"))
 
+    fun onCharacterClick(index:Int, context: Context) {
+    val character = characterList[index]
+        Toast.makeText(context, character.name, Toast.LENGTH_SHORT).show()
+    }
+
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CharacterViewHolder {
-        TODO("Not yet implemented")
+        val cellCharactersBinding = CellCharactersBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+        return CharacterViewHolder(cellCharactersBinding)
     }
 
     override fun onBindViewHolder(holder: CharacterViewHolder, position: Int) {
-        TODO("Not yet implemented")
+       val character = characterList[position]
+        holder.fillWithCharacter(character)
     }
 
     override fun getItemCount(): Int {
         return characterList.size
     }
-    class CharacterViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+    inner class CharacterViewHolder(private val cellCharactersBinding: CellCharactersBinding) : RecyclerView.ViewHolder(cellCharactersBinding.root),
+        View.OnClickListener {
+        private val ui_title = cellCharactersBinding.uiTitle
+        private val ui_subtitle = cellCharactersBinding.uiSubtitle
 
+        init {
+            cellCharactersBinding.root.setOnClickListener(this)
+        }
+
+        fun fillWithCharacter(characters: Characters) {
+            ui_title.text = characters.name
+            ui_subtitle.text = characters.show
+        }
+
+        override fun onClick(v: View?) {
+            if (v != null) {
+                onCharacterClick(adapterPosition, v.context)
+            }
+        }
     }
-
 }
