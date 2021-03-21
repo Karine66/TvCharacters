@@ -7,25 +7,43 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
 import com.karine.tvcharacters.databinding.CellCharactersBinding
+import io.realm.Realm
+import io.realm.RealmResults
 
-class CharactersAdapter() :RecyclerView.Adapter<CharactersAdapter.CharacterViewHolder>() {
+class CharactersAdapter :RecyclerView.Adapter<CharactersAdapter.CharacterViewHolder>() {
 
-    val characterList = arrayOf(Characters("Richard Hendricks", "Silicon Valley"),
-    Characters("Jared Dunn", "Silicon Valley"),
-        Characters("Will McAvoy", "The NewsRoom"),
+    private val characterList: RealmResults<Characters>
+
+    init {
+        val realm = Realm.getDefaultInstance()
+        characterList = realm.where(Characters::class.java).sort("show").findAll()
+        if (characterList.size == 0) {
+            val initialCharactersList = arrayOf(
+                Characters("Richard Hendricks", "Silicon Valley"),
+                Characters("Jared Dunn", "Silicon Valley"),
+                Characters("Will McAvoy", "The NewsRoom"),
                 Characters("Mackenzie MacHale", "The NewsRoom"),
-        Characters("Jim Harper", "The NewsRoom"),
-        Characters("Ross Geller", "Friends"),
-        Characters("Chandler Bing", "Friends"),
-        Characters("Joey Tribianni", "Friends"),
-        Characters("Monical Geller", "Friends"),
-        Characters("Charlie Harper", "Two and Half men"),
-        Characters("Allan Harper", "Two and Half men"),
-        Characters("Jake Harper", "Two and Half men"))
-
+                Characters("Jim Harper", "The NewsRoom"),
+                Characters("Ross Geller", "Friends"),
+                Characters("Chandler Bing", "Friends"),
+                Characters("Joey Tribianni", "Friends"),
+                Characters("Monical Geller", "Friends"),
+                Characters("Charlie Harper", "Two and Half men"),
+                Characters("Allan Harper", "Two and Half men"),
+                Characters("Jake Harper", "Two and Half men")
+            )
+            realm.beginTransaction()
+            for(character in initialCharactersList){
+                realm.copyToRealm(character)
+            }
+            realm.commitTransaction()
+        }
+    }
     fun onCharacterClick(index:Int, context: Context) {
-    val character = characterList[index]
-        Toast.makeText(context, character.name, Toast.LENGTH_SHORT).show()
+        val character = characterList[index]
+        if (character != null) {
+            Toast.makeText(context, character.name, Toast.LENGTH_SHORT).show()
+        }
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CharacterViewHolder {
@@ -34,8 +52,10 @@ class CharactersAdapter() :RecyclerView.Adapter<CharactersAdapter.CharacterViewH
     }
 
     override fun onBindViewHolder(holder: CharacterViewHolder, position: Int) {
-       val character = characterList[position]
-        holder.fillWithCharacter(character)
+        val character = characterList[position]
+        if (character != null) {
+            holder.fillWithCharacter(character)
+        }
     }
 
     override fun getItemCount(): Int {
